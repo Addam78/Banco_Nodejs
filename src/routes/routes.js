@@ -1,5 +1,5 @@
 const express = require('express');
-const router = express.Router();
+const router = express.Router(); 
 const mysql = require('mysql2')
 
 const conexao = mysql.createConnection({
@@ -16,13 +16,34 @@ router.get('/', (req, res) => {
     
 });
 
+router.get('/cadastrar', (req,res) =>{
+    res.render('criar_login')
+})
+
+//VALIDAR CADASTRO
+router.post('/validar_cadastro', (req,res) => {
+    let nome= req.body.nome
+    let senha = req.body.senha
+    let cpf = req.body.CPF
+
+    //CONSULTA SQL
+    let sql = 'SELECT FROM * CLIENTE'
+    //CONFERIR COM BANCO DE DADOS
+    if (nome || senha || cpf != sql ){
+        let sql = `INSERT INTO CLIENTE (NOME,SENHA,CPF) VALUES ('${nome}', '${senha}',' ${cpf}')`
+        conexao.query(sql,function(erro, retorno){
+            if(erro) throw erro
+           })
+    }
+    else{
+        return res.send('Usuario ja existente')
+    }
+  
+})
+
 //VERIFICAR LOGIN
 router.post('/verifica', (req,res) => {
-    let nome = req.body.nome
-    let senha = req.body.senha
 
-    let sql = `SELECT NOME SENHA FROM CLIENTE WHERE ${nome = nome, senha = senha}`
-    
 })
 
 router.get('/teste', (req,res) =>{
