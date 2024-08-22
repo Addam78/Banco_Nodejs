@@ -20,6 +20,8 @@ const conexao = mysql.createConnection({
 conexao.connect(function(erro){
     if(erro) throw erro;
     console.log('Conexão com suceso')
+
+    
 })
 
 //EXPORTANDO ARQUIVO ROTAS
