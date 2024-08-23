@@ -6,15 +6,13 @@
     <title>Document</title>
 </head>
 <body>
-    <h1>Registrar ou Logar</h1>
-    <div>
-        <form action="/verifica" method="POST">
-            <input type="text" name="nome">Nome <br>
-            <p></p>
-            <input type="text" name="senha">Senha <br>
-            <p></p>
-            <button>Logar</button>
-        </form>
-    </div>
+    <h1>Realizar cadastro</h1>
+    <form action="/validar_cadastro" method="post">
+        <input type="text" name="nome" >Insira seu nome <br>
+        <input type="text" name="senha" >Insira sua senha <br>
+        <input type="text" name="CPF" >Insira sua CPF <br>
+        <button>Enviar</button>
+        
+    </form>
 </body>
 </html>

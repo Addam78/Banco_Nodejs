@@ -4,6 +4,7 @@ const cors = require('cors')
 const app = express()
 const exphbs = require('express-handlebars');
 const path = require('path');
+const session = require('express-session');
 
 //---------MYSQL-----------------//
 const mysql = require('mysql2')
@@ -23,6 +24,14 @@ conexao.connect(function(erro){
 
     
 })
+
+// Configuração do middleware de sessão
+app.use(session({
+    secret: 'seu-segredo', // Substitua por uma string secreta mais segura
+    resave: false,
+    saveUninitialized: true,
+    cookie: { secure: false } // Use `true` se estiver usando HTTPS
+  }));
 
 //EXPORTANDO ARQUIVO ROTAS
 const routes = require('./src/routes/routes')
