@@ -7,12 +7,23 @@
 </head>
 <body>
     <h1>Area para deposito</h1>
-    <form  action="/inserir_nota" method="POST">
+    {{!-- <form >
     <label>
         
         <input type="number" name="inserir">Insira o valor que deseja depositar<br>
-        <button>Confirmar</button>
+        
     </label>
-    </form>
+    </form> --}}
+
+    <form  action="/inserir_nota" method="POST"> 
+    <div class="mb-3">
+        <label class="form-label">Insira o valor que deseja depositar</label>
+        <input type="number" class="form-control"  name="inserir">
+        <button class="btn btn-primary">Confirmar</button>
+        
+        <a href="/principal" class="btn btn-primary">Retornar area incial</a>
+
+    </div>
+    
 </body>
 </html>

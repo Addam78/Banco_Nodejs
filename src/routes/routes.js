@@ -22,26 +22,60 @@ router.get('/cadastrar', (req,res) =>{
 
 //VALIDAR CADASTRO
 router.post('/validar_cadastro', (req,res) => {
-    let nome= req.body.nome
-    let senha = req.body.senha
-    let cpf = req.body.CPF
 
-    //CONSULTA SQL
-    let sql = 'SELECT FROM * CLIENTE'
-    //CONFERIR COM BANCO DE DADOS
-    if (nome || senha || cpf != sql ){
-        let sql = `INSERT INTO CLIENTE (NOME,SENHA,CPF) VALUES ('${nome}', '${senha}',' ${cpf}')`
-        conexao.query(sql,function(erro, retorno){
-            if(erro) throw erro
-           })
-        res.redirect('/')
-    }
+    //DECLARAR VARIAVAEL
+    const nome = req.body.nome;
+    const senha = req.body.senha;
+    const cpf = req.body.cpf; // Corrigido para 'cpf'
 
-    else{
-        return res.send('Usuario ja existente')
-    }
+    // Verificar se já existe um usuário com o mesmo nome, CPF ou senha
+    let sql = `
+        SELECT COUNT(*) AS count 
+        FROM CLIENTE 
+        WHERE NOME = ? OR CPF = ? OR SENHA = ?
+    `;
+
+    conexao.query(sql, [nome, cpf, senha], (erro, resultado) => {
+        if (erro) {
+            console.error(erro);
+            return res.status(500).send('Erro no servidor');
+        }
+
+        if (resultado[0].count > 0) {
+            return res.send('Usuário já existente com o mesmo nome, CPF ou senha');
+        } else {
+            // Inserir novo usuário
+            const insertSql = `
+                INSERT INTO CLIENTE (NOME, SENHA, CPF) 
+                VALUES (?, ?, ?)
+            `;
+            conexao.query(insertSql, [nome, senha, cpf], (erro, retorno) => {
+                if (erro) {
+                    console.error(erro);
+                    return res.status(500).send('Erro ao cadastrar usuário');
+                }
+                res.redirect('/');
+            });
+        }
+    });
+});
   
-})
+        
+        
+         
+        
+   
+
+
+    // else{
+    //     let sql = `INSERT INTO CLIENTE (NOME,SENHA,CPF) VALUES ('${nome}', '${senha}',' ${cpf}')`
+    //     conexao.query(sql,function(erro, retorno){
+    //         if(erro) throw erro
+    //        })
+    //     res.redirect('/')
+    // }
+  
+
 
 //VERIFICAR LOGIN
 router.post('/verifica', (req,res) => {
@@ -140,5 +174,13 @@ router.post('/inserir_nota', (req, res) => {
   
    
 );
+
+router.get('/listagem', (req,res) => {
+  let sql = 'SELECT NOME FROM CLIENTE'
+
+  conexao.query(sql,function(erro,retorno){
+    res.render('verifica_usuarios',{total:retorno})
+  })
+})
 
 module.exports = router;
