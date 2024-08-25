@@ -6,6 +6,13 @@
     <title>Document</title>
 </head>
 <body>
-    
+    <h1>usuarios listados</h1>
+    <div>
+        {{#each total}}
+            <p>{{NOME}}</p>
+            <P>{{SENHA}}</P>
+            <hr>
+        {{/each}}
+    </div>
 </body>
 </html>

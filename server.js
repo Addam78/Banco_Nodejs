@@ -45,6 +45,12 @@ app.use(bodyParser.json());
 //Configurando handlebars
 const handlebars = require('express-handlebars')
 app.engine('handlebars', handlebars.engine({
+  helpers: {
+    // Função auxiliar para verificar se o parâmetro é verdadeiro
+    seVerdadeiro: function (parametro, options) {
+      return parametro ? options.fn(this) : options.inverse(this);
+    }
+  },
   defaultLayout: 'main',
   runtimeOptions: {
       allowProtoPropertiesByDefault: true,
@@ -54,5 +60,16 @@ app.engine('handlebars', handlebars.engine({
 app.set('view engine', 'handlebars')
 
 app.use(routes)
+
+
+//CONFIGURAÇÃO PARA OS ARQUIVOS NO MODO CSS
+app.use(express.static('public'))
 //definição da porta que o app vair rodar
+
+//  Flash
+// const session = require('express-session');
+const flash = require('connect-flash');
+app.use(flash())
+
+
 app.listen(8084, () => {console.log(`Servidor rodando na porta http://localhost:8084/`)})
