@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Realizar pagamento</title>
+</head>
+<body>
+    <h1>Realizar pagamento</h1>
+        {{!-- FORMULARIO NO METODO POST, POIS VAI ENVIAR OS DADOS QUE O USUARIO INSERIU --}}
+        <form action="/verifica_pagamento" method="post">
+            <div class="mb-3">
+                <label class="form-label">Insira o valor do pagamento</label>
+                <input type="number" class="form-control"  name="pagar">
+
+                <label class="form-label">Insira a descrição do pagamento (opcional)</label>
+                <input type="number" class="form-control"  name="descrever">
+
+                <button class="btn btn-primary">Confirmar</button>
+                <a href="/principal" class="btn btn-primary">Retornar area inicial</a>
+            </div>
+        </form>
+</body>
+</html>
