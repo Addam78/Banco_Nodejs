@@ -66,12 +66,7 @@ router.post('/validar_cadastro', (req, res) => {
 });
 
 
-
-
-
-
-
-
+ 
 // else{
 //     let sql = `INSERT INTO CLIENTE (NOME,SENHA,CPF) VALUES ('${nome}', '${senha}',' ${cpf}')`
 //     conexao.query(sql,function(erro, retorno){
@@ -91,6 +86,10 @@ router.post('/verifica', (req, res) => {
 
     // Query SQL com placeholders para evitar SQL Injection
     let sql = 'SELECT ID, NOME, SENHA FROM CLIENTE WHERE NOME = ? AND SENHA = ?';
+
+    //QUERY SQL PARA GERAR ATAQUE SQLINJECTION...
+    //let sql = `SELECT ID, NOME, SENHA FROM CLIENTE WHERE NOME = '${nome}' AND SENHA = '${senha}'`;
+    
 
     // Executa a consulta ao banco de dados
     conexao.query(sql, [nome, senha], (erro, resultados) => {
