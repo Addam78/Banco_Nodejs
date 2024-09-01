@@ -5,358 +5,106 @@ const router = express.Router();
 const mysql = require('mysql2')
 const flash = require('connect-flash');
 
+//CONST CRIADA PARA REFERENCA A CONTROLLERS
+
+const logicas = require('../controllers/logica')
 
 
 const conexao = mysql.createConnection({
-    host: 'localhost',
-    user: 'root',
-    password: '1234',
-    database: 'FAITH'
-
-})
-
-router.get('/', (req, res) => {
-    res.render('login');
-    //res.send('Ola')
-
+    host: process.env.DB_HOST,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME
 });
 
-router.get('/cadastrar', (req, res) => {
-    res.render('registrar')
-})
+
+//COSNT LOGIA DE ROUTES . EXPORTS DE CONTROLLERS
+
+//ROTA PRINCIPAL
+router.get('/', logicas.logica_banco);
+
+
+//ROTA PARA REALIZAR CADASTRO
+router.get('/cadastrar', logicas.logica_banco_cadastro)
+
 
 //VALIDAR CADASTRO
-router.post('/validar_cadastro', (req, res) => {
-
-    //DECLARAR VARIAVAEL
-    const nome = req.body.nome;
-    const senha = req.body.senha;
-    const cpf = req.body.cpf; // Corrigido para 'cpf'
-
-    // Verificar se já existe um usuário com o mesmo nome, CPF ou senha
-    let sql = `
-        SELECT COUNT(*) AS count 
-        FROM CLIENTE 
-        WHERE NOME = ? OR CPF = ? OR SENHA = ?
-    `;
-
-    conexao.query(sql, [nome, cpf, senha], (erro, resultado) => {
-        if (erro) {
-            console.error(erro);
-            return res.status(500).send('Erro no servidor');
-        }
-
-        if (resultado[0].count > 0) {
-            return res.send('Usuário já existente com o mesmo nome, CPF ou senha');
-        } else {
-            // Inserir novo usuário
-            const insertSql = `
-                INSERT INTO CLIENTE (NOME, SENHA, CPF) 
-                VALUES (?, ?, ?)
-            `;
-            conexao.query(insertSql, [nome, senha, cpf], (erro, retorno) => {
-                if (erro) {
-                    console.error(erro);
-                    return res.status(500).send('Erro ao cadastrar usuário');
-                }
-                res.redirect('/');
-            });
-        }
-    });
-});
-
-
- 
-// else{
-//     let sql = `INSERT INTO CLIENTE (NOME,SENHA,CPF) VALUES ('${nome}', '${senha}',' ${cpf}')`
-//     conexao.query(sql,function(erro, retorno){
-//         if(erro) throw erro
-//        })
-//     res.redirect('/')
-// }
-
+router.post('/validar_cadastro', logicas.logica_banco_validar_cadastro);
 
 
 //VERIFICAR LOGIN
-router.post('/verifica', (req, res) => {
-    let nome = req.body.nome
-    let senha = req.body.senha
-
-
-
-    // Query SQL com placeholders para evitar SQL Injection
-    let sql = 'SELECT ID, NOME, SENHA FROM CLIENTE WHERE NOME = ? AND SENHA = ?';
-
-    //QUERY SQL PARA GERAR ATAQUE SQLINJECTION...
-    //let sql = `SELECT ID, NOME, SENHA FROM CLIENTE WHERE NOME = '${nome}' AND SENHA = '${senha}'`;
-    
-
-    // Executa a consulta ao banco de dados
-    conexao.query(sql, [nome, senha], (erro, resultados) => {
-        if (erro) {
-            console.error('Erro ao consultar o banco de dados:', erro);
-            res.status(500).send('Erro interno do servidor');
-            return;
-        }
-
-        // Verifica se há algum resultado
-        if (resultados.length > 0) {
-            req.session.userId = resultados[0].ID;
-            req.session.userName = resultados[0].NOME;
-            // Usuário encontrado, redireciona para a página principal
-            res.redirect('/principal');
-        } else {
-            // Usuário não encontrado, retorna mensagem de erro
-            res.send('Usuário e senha inválidos');
-        }
-
-
-    });
-});
-
+router.post('/verifica', logicas.logica_banco_validar_login);
 
 
 //ROTA PARA IR PARA PAGINA INICIAL
-router.get('/principal', (req, res) => {
-    if (!req.session.userId) {
-        return res.redirect('/');
-    }
-
-    let saldo_usuario = req.session.userId
-    let nome_usuario = req.session.userName
-
-    //CRIANDO QUERIE SQL PARA GERAR SALARIO TOTAL DO USUARIO
-    let sql = `SELECT SUM(DEPOSITO) -  COALESCE(SUM(RETIRADA), 0) as saldo_total FROM CONTA WHERE ID = ${saldo_usuario}`
-
-    conexao.query(sql, [saldo_usuario], (erro, retorno) => {
-        if (erro) {
-            console.error('Erro ao executar a query:', erro);
-            return res.status(500).send('Erro no servidor');
-        }
-
-        // Verificar e acessar o saldo total do resultado da consulta
-        const saldoTotal = retorno[0].saldo_total || 0;
-
-        // Renderizar o template Handlebars e passar o saldo total
-        res.render('area_inicial', { saldo_total: saldoTotal, nome_usuario });
+router.get('/principal', logicas.logica_banco_inicio)
 
 
-    })
 
-
-})
-
-
-router.get('/teste', (req, res) => {
-    if (!req.session.userId) {
-        return res.redirect('/');
-    }
-    res.render('depositar', { nome: req.session.userName })
-})
+router.get('/teste', logicas.logica_banco_teste)
 
 //RESPONSAVEL POR RECEBER O VALOR INSERIDO PELO MODO POST E VALIDAR
-router.post('/inserir_nota', (req, res) => {
-
-    // Verificar se o ID do usuário está na sessão
-    if (!req.session.userId) {
-        return res.status(401).send('Usuário não autenticado');
-    }
-
-    // Obter o ID e nome do usuário da sessão
-    let clienteID = req.session.userId;
-    let deposito = req.body.inserir;
-
-    console.log(`ID do cliente da sessão: ${clienteID}`);
-    console.log(`Valor do depósito: ${deposito}`);
-
-
-    if (req.body.inserir >= 10) {
-
-        //QUERIE MYSQL
-        //let sql = `INSERT INTO CONTA (DEPOSITO) VALUES (${deposito})`
-        //inserir o id de quem esta depositando
-        let sql = `INSERT INTO CONTA (ID, DEPOSITO)
-    VALUES ('${clienteID}', '${deposito}')
-    ON DUPLICATE KEY UPDATE SALDO_ATUAL = VALUES(SALDO_ATUAL)`
-
-
-
-        //EXECUTAR COMANDO
-        conexao.query(sql, function (erro, retorno) {
-            if (erro) throw erro
-        })
-
-        // req.flash('success', 'Dinheiro depositado com sucesso!');
-        res.redirect('/principal')
-        //return res.send(`Deposito no valor de R$ ${req.body.inserir}`)
-    }
-
-    else {
-        return res.send(`Valor de deposito invalido`)
-
-    }
-}
-
-
-
-);
+router.post('/inserir_nota', logicas.logica_banco_recebe_inserção);
 
 
 //ROTA PARA IR PARA O TEMPLATE DERETIRADA DE DINHEIRO
-router.get('/sacar', (req, res) => {
-    res.render('sacar_dinheiro')
-})
+router.get('/sacar', logicas.logica_banco_nsei)
+
 
 // //ROTA PARA VALIDAR  RETIRADA DO DINHEIRO
-// router.post('/sacar_dinheiro', (req,res)=>{
+router.post('/sacar_dinheiro', logicas.logica_banco_retira_dinheiro)
 
 
-//     if (!req.session.userId) {
-//         return res.status(401).send('Usuário não autenticado');
-//     }
+//ROTA PARA EXECUTAR PAGAMENTOS ---LEMBRAR DE UTILIZAR O CAMPO DESCRIÇÃO -- // UTILZIAR  O MESMO CAMPO DE RETIRADA
+router.get('/pagamento', logicas.logica_banco_pagamento)
+
+//CRIAR LOGICA PARA ROTA DE VERIFICAÇÃO DE PAGAMENTO
+router.post('/verifica_pagamento', logicas.logica_banco_verifica_pagamento)
 
 
-//     //CAPTURANDO ID DO USUARIO
-//     let clienteID = req.session.userId;
-//     console.log(`ID do cliente da sessão: ${clienteID}`);
-//     //PEGA VARAIVEL DO BANCO E IMBUTE ELA NO REQ.BODY.RETIRAR DO FRONT
-//     let retirada = req.body.retirar
-
-//     let sql = `SELECT SUM(DEPOSITO) -  COALESCE(SUM(RETIRADA), 0) as saldo_total FROM CONTA WHERE ID = ${clienteID}`
-
-//     conexao.query(sql, [clienteID], (erro, resultado) => {
-//     if (erro) {
-//         console.error('Erro ao executar a query:', erro);
-//         return res.status(500).send('Erro no servidor');
-//     }
-
-//     // Verificar e acessar o saldo total do resultado da consulta
-//     const saldoTotal = resultado[0].saldo_total ;
-//     //const saldo_Total = resultado[clienteID].saldo_total
-//     console.log(`sALDO TOTAL :${saldoTotal}`)
-//     console.log(`Saque dinheiro :${retirada}` )
-//     // Verificar se a retirada excede o saldo disponível
-//     if (retirada > saldoTotal) {
-//             return res.send('Valor excedido');
-//         }
-
-//     else{
-//         let sql = `INSERT INTO CONTA (ID, RETIRADA)
-//         VALUES ('${clienteID}', '${retirada}')
-//         ON DUPLICATE KEY UPDATE SALDO_ATUAL = VALUES(SALDO_ATUAL)`
-
-//     conexao.query(sql,function(erro, retorno){
-//             if(erro) throw erro
-//         })
-//             res.redirect('/principal')
-//         }
-//         }
+//EXIBIR TODOS USUARIOS
+router.get('/listagem', logicas.logica_banco_listagem)
 
 
+router.get('/historicoprincipal', (req,res) =>{
+    res.render('historico_main')
+})
 
-//     )}
+router.get('/consulta_deposito', (req, res) => {
 
-// )
-router.post('/sacar_dinheiro', (req, res) => {
     if (!req.session.userId) {
         return res.status(401).send('Usuário não autenticado');
     }
 
-    // Captura o ID do usuário e o valor da retirada
-    const clienteID = req.session.userId;
-    const retirada = parseFloat(req.body.retirar);
-    //COSNTANTE PARA PEGAR A DESCRIÇÃO DO SAQUE 
-    let descricao = req.body.describe
-    //CONSTANTE PADRÃO PARA DESCRIÇÃO DO SAQUE
-    //const descricao_padrao = `Saque no valor x `
+    let id = req.session.userId
+    console.log(id)
 
-    // Valida o valor da retirada
-    if (isNaN(retirada) || retirada <= 0) {
-        return res.send('Valor inválido para retirada.');
+    let sql = `SELECT deposito, data_criacao from CONTA WHERE id  = ${id} and deposito is not null order by data_criacao desc`
+
+    conexao.query(sql, function (erro, retorno) {
+        res.render('historico_deposito', { historico_deposito: retorno })
+    })
+}
+
+)
+
+router.get('/consulta_saque', (req, res) => {
+
+    if (!req.session.userId) {
+        return res.status(401).send('Usuário não autenticado');
     }
 
-    // Consulta para obter o saldo total
-    const saldoQuery = `SELECT SUM(DEPOSITO) - COALESCE(SUM(RETIRADA), 0) as saldo_total FROM CONTA WHERE ID = ?`;
+    let id = req.session.userId
+    console.log(id)
 
-    conexao.query(saldoQuery, [clienteID], (erro, resultado) => {
-        if (erro) {
-            console.error('Erro ao executar a query:', erro);
-            return res.status(500).send('Erro no servidor');
-        }
+    let sql = `SELECT retirada, descricao, data_criacao from CONTA WHERE id  = ${id} and retirada is not null order by data_criacao desc`
 
-        // Verifica e acessa o saldo total do resultado da consulta
-        const saldoTotal = parseFloat(resultado[0].saldo_total) || 0;
-        console.log(`Saldo Total: ${saldoTotal}`);
-        console.log(`Retirada: ${retirada}`);
-
-        // Verifica se a retirada excede o saldo disponível
-        if (retirada > saldoTotal) {
-            return res.send('Valor excedido');
-        }
-
-
-        // Atualiza o banco de dados com a retirada
-        const updateQuery = `
-            INSERT INTO CONTA (ID, RETIRADA)
-            VALUES (?, ?)
-            ON DUPLICATE KEY UPDATE RETIRADA = VALUES(RETIRADA), SALDO_ATUAL = SALDO_ATUAL - VALUES(RETIRADA)
-        `;
-
-        conexao.query(updateQuery, [clienteID, retirada], (erro, resultado) => {
-            if (erro) {
-                console.error('Erro ao executar a query de atualização:', erro);
-                return res.status(500).send('Erro no servidor');
-            }
-
-            // res.redirect('/principal');
-        });
-    
-
-        //VALIDANDO DESCRIÇÃO DO USUARIO
-        if (descricao === '') {
-            descricao = `Valor padrão sacado`
-        }
-
-        const updateQuery_segundo = `INSERT INTO CONTA (ID, DESCRICAO) VALUES (?, ?)
-                ON DUPLICATE KEY UPDATE 
-                DESCRICAO = VALUES(DESCRICAO)`
-
-        conexao.query(updateQuery_segundo, [clienteID, descricao], (erro, resultado) => {
-            if (erro) {
-                console.error('Erro ao executar a query de atualização:', erro);
-                return res.status(500).send('Erro no servidor');
-            }
-
-
-        });
-        console.log(descricao)
-
-        res.redirect('/principal')
-    });
-})
-
-
-    //ROTA PARA EXECUTAR PAGAMENTOS ---LEMBRAR DE UTILIZAR O CAMPO DESCRIÇÃO -- // UTILZIAR  O MESMO CAMPO DE RETIRADA
-    router.get('/pagamento', (req, res) => {
-        res.render('payament')
+    conexao.query(sql, function (erro, retorno) {
+        res.render('historico_saque', { historico_saque: retorno })
     })
+}
 
-    //CRIAR LOGICA PARA ROTA DE VERIFICAÇÃO DE PAGAMENTO
-    router.post('/verifica_pagamento', (req, res) => {
-        // res.send('Rota funcionando')
-        let retirada = req.body.pagar
-        console.log(retirada)
-    })
+)
 
 
-    //EXIBIR TODOS USUARIOS
-    router.get('/listagem', (req, res) => {
-        let sql = 'SELECT NOME, SENHA FROM CLIENTE'
-
-        //total é um parametro qualquer que se passa para exibir o resultaod da uery 
-        conexao.query(sql, function (erro, retorno) {
-            res.render('verifica_usuarios', { total: retorno })
-        })
-    })
-
-    module.exports = router;
+module.exports = router;

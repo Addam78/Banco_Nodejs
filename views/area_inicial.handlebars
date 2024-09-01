@@ -1,63 +1,3 @@
-{{!-- <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Área Inicial</title>
-    <!-- Link para o Bootstrap CSS -->
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <!-- Link para o Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-</head>
-<body>
-    <div class="container mt-5">
-        <!-- Título principal -->
-        <h1 class="text-center mb-4">Escolha uma das opções abaixo</h1>
-
-        <!-- Saudação ao usuário -->
-        <h2 class="text-center mb-4">Olá, Sr. {{nome_usuario}}</h2>
-
-        <!-- Links para ações -->
-        <div class="row">
-            <div class="col-md-4 text-center mb-3">
-                <a href="/sacar" class="btn btn-primary btn-lg">
-                    <i class="fas fa-hand-holding-usd"></i> Sacar
-                </a>
-            </div>
-            <div class="col-md-4 text-center mb-3">
-                <a href="teste" class="btn btn-success btn-lg">
-                    <i class="fas fa-wallet"></i> Depositar
-                </a>
-            </div>
-            <div class="col-md-4 text-center mb-3">
-                <a href="#" class="btn btn-info btn-lg">
-                    <i class="fas fa-mobile-alt"></i> Recarga de Celular
-                </a>
-            </div>
-            <div class="col-md-4 text-center mb-3">
-                <a href="#" class="btn btn-info btn-lg">
-                    <i class="fas fa-mobile-alt"></i> Pagamentos
-                </a>
-            </div>
-        </div>
-
-        <!-- Exibição do saldo total -->
-        <div class="text-center mt-4">
-            <p class="lead">Seu saldo atual é de: R$ {{saldo_total}}</p>
-        </div>
-
-        <div>
-            <a href="/">Retornar a area de login</a>
-        </div>
-    </div>
-
-    <!-- Scripts do Bootstrap e jQuery -->
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-</body>
-</html> --}}
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -94,6 +34,13 @@
                     <i class="fas fa-mobile-alt"></i> Recarga de Celular
                 </a>
             </div>
+
+            <div class="col-md-4 text-center mb-3">
+                <a href="/historicoprincipal" class="btn btn-primary btn-lg">
+                    <i class="fas fa-book"></i> Histórico
+                </a>
+            </div>
+
             <!-- Ajustado para garantir que "Pagamentos" fique no mesmo alinhamento -->
             <div class="col-md-4 text-center mb-3">
                 <a href="/pagamento" class="btn btn-info btn-lg">

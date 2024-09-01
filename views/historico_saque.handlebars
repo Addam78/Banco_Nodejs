@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <h1>Historico de Saque </h1>
+    <hr>
+
+    {{#each historico_saque}}
+
+        <h3>Data de deposito</h3>
+        <p>{{data_criacao}}</p>
+
+        <h4>Valor do Saque</h4>
+        <p>R${{retirada}}</p>
+
+        <h4>Descricao</h4>
+        <p>{{descricao}}</p>
+       
+        <hr>
+    
+    {{/each}}
+    
+</body>
+</html>

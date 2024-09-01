@@ -5,17 +5,18 @@ const app = express()
 const exphbs = require('express-handlebars');
 const path = require('path');
 const session = require('express-session');
+require ('dotenv').config()
 
 //---------MYSQL-----------------//
 const mysql = require('mysql2')
-//CONFIGURAÇÃO_BASE_DADOS
+
+
 const conexao = mysql.createConnection({
-    host:'localhost',
-    user:'root',
-    password:'1234',
-    database : 'FAITH'
-    
-})
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME
+});
 
 //TESTE CONEXÃO
 conexao.connect(function(erro){
@@ -72,4 +73,4 @@ const flash = require('connect-flash');
 app.use(flash())
 
 
-app.listen(8084, () => {console.log(`Servidor rodando na porta http://localhost:8084/`)})
+app.listen(process.env.PORT, () => {console.log(`Servidor rodando na porta http://localhost:8085/`)})
