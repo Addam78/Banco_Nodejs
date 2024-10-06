@@ -261,7 +261,7 @@ router.get('/sacar', (req,res)=>{
 router.post('/sacar_dinheiro', (req, res) => {
     if (!req.session.userId) {
         return res.status(401).send('Usuário não autenticado');
-    }
+    } 
 
     // Captura o ID do usuário e o valor da retirada
     const clienteID = req.session.userId;
